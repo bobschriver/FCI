@@ -1,0 +1,9 @@
+TASKS:
+
+Group Blocks
+Encode and Decode blocks
+
+RGB -> YCrCb -> RGB
+Break into LF/HF
+Functional Representation of LF blocks
+Store in file
