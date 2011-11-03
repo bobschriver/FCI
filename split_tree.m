@@ -1,6 +1,6 @@
 function [ codeTable ] = split_tree( currentCode, prob, count )
 
-
+% End condition
 if numel(count) == 1
     codeTable = struct('count', count, 'code', currentCode);
 else
