@@ -9,9 +9,8 @@ function [ img_LF, img_HF ] = frequency_decomp( img, scale )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%  Kernel Generation  %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 % find size of image
-[numRows, numCols] = size(img, scale);
+[numRows, numCols] = size(img);
 
 %Define bounds for gaussian kernel
 highBoundX = numCols - floor(numCols)/2;
@@ -55,7 +54,4 @@ img_fft_HF = img_fft.*kernel_high;
 img_LF = real(ifft2(ifftshift(img_fft_LF)));
 img_HF = real(ifft2(ifftshift(img_fft_HF)));
 
-
-
 end
-
