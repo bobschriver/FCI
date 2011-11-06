@@ -1,5 +1,5 @@
-function [ coeff, vars ] = fitfunction( im, blockSize )
-%FIND_FUNCTION Find 2D function of best fit
+function [ coeff, vars ] = im2func( im, blockSize )
+%IM2FUNC Find 2D function of best fit for each region in an image
 %   Uses curve fitting to find a 2D function of best for for each region of
 %   an image. Requires specification of block size and assumes input image
 %   is scaled from 0-255.
@@ -21,7 +21,7 @@ blocks = mat2cell( im, repmat(blockSize(1),1,numWidth),...
     repmat(blockSize(2),1,numHeight) );
 
 %% Perform curve fitting on each region
-[x, y] = ind2sub( [blockSize(1),blockSize(2)], 1:numel(blocks{1}) );
+[x, y] = ind2sub( blockSize, 1:numel(blocks{1}) );
 fitObj = cell(numHeight, numWidth);
 
 %Fit a surface to each block using 3rd order polynomial
