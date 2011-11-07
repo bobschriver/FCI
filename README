@@ -7,3 +7,15 @@ RGB -> YCrCb -> RGB
 Break into LF/HF
 Functional Representation of LF blocks
 Store in file
+
+
+
+Things to store in image file format:
+Ychannel - Function rep
+Cr channel = Function rep
+Cb channel - Function rep
+Ychannel - huffman encoded HF band
+Scale factor used to decompose image
+Image Size
+
+
