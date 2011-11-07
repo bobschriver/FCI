@@ -34,13 +34,13 @@ struct huffman_node * gen_priority_queue(double * probabilities , int probabilit
 
 struct huffman_node * gen_huffman_tree(struct huffman_node * queue)
 {
-	while(queue->next != NULL)
+	while(1)
 	{
 		printf("%d\n" , queue);
 		fflush(stdout);
 		
 		struct huffman_node * comb = malloc(sizeof(struct huffman_node));
-
+		memset(comb , 0 , sizeof(struct huffman_node));
 		struct huffman_node * left = pop(queue);
 		struct huffman_node * right = pop(queue);
 
@@ -71,8 +71,10 @@ struct huffman_node * gen_huffman_codes(struct huffman_node * tree)
 
 struct huffman_node * gen_huffman_codes_3(struct huffman_node * tree , unsigned long long code , int code_size)
 {
-	struct huffman_node * left;
-	struct huffman_node * right;
+	struct huffman_node * left = NULL;
+	struct huffman_node * right = NULL;
+
+	printf("Tree left %d tree right %d\n" , tree->left , tree->right);
 
 	if(tree->left != NULL)
 	{
@@ -101,19 +103,27 @@ struct huffman_node * gen_huffman_codes_3(struct huffman_node * tree , unsigned 
 		tree->code = code;
 		tree->code_size = code_size;
 
+		printf("Prob %f\n" , tree->probability);
+		printf("Code size %d\n" , tree->code_size);
+		printf("Code %d\n" , tree->code);	
+
 		return tree;
 	}
 	else
 	{
 		struct huffman_node * insert = left;
 
+		printf("Insert probability %f\n" , insert->probability);
+
 		while(insert->next != NULL)
 		{
+			printf("%d " , insert);
 			insert = insert->next;
+
 		}
 		
 		insert->next = right;
-		return left;
+		return insert;
 	}
 }
 
@@ -140,4 +150,15 @@ int main(char * args , int argc)
 	printf("%f %d %d\n" , tree->probability , tree->left , tree->right);
 	printf("%f %f\n" , tree->left->probability , tree->right->probability);
 
+
+	struct huffman_node * codes = gen_huffman_codes(tree);
+
+	struct huffman_node * curr = codes;
+
+	while(curr != NULL)
+	{
+		printf("Code %d Code length %d Prob %f\n" , curr->code , curr->code_size , curr->probability);
+
+		curr = curr->next;
+	}
 }

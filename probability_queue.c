@@ -15,8 +15,8 @@ struct huffman_node * pop()
 	if(head != NULL)
 	{
 		head = head->next;
+		ret->next = NULL;
 	}
-
 	return ret;
 }
 
