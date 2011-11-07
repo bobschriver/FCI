@@ -20,7 +20,7 @@ img = im2double(img);
 highBoundX = numCols - floor(numCols)/2;
 lowBoundX = 1-floor(numCols)/2;
 highBoundY = numRows - floor(numRows)/2;
-lowBoundY = 1-floor(numCols)/2;
+lowBoundY = 1-floor(numRows)/2;
 
 % Define sigma values for X and Y (kept the same for this implementation).
 % Scale value set by user to set LF and HF cutoff point
