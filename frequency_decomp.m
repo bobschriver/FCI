@@ -9,6 +9,10 @@ function [ img_LF, img_HF ] = frequency_decomp( img, scale )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%  Kernel Generation  %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Scale image 0-1 for consistency with code
+img = im2double(img);
+
+
 % find size of image
 [numRows, numCols] = size(img);
 
@@ -16,7 +20,7 @@ function [ img_LF, img_HF ] = frequency_decomp( img, scale )
 highBoundX = numCols - floor(numCols)/2;
 lowBoundX = 1-floor(numCols)/2;
 highBoundY = numRows - floor(numRows)/2;
-lowBoundY = 1-floor(numCols)/2;
+lowBoundY = 1-floor(numRows)/2;
 
 % Define sigma values for X and Y (kept the same for this implementation).
 % Scale value set by user to set LF and HF cutoff point
