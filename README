@@ -11,6 +11,7 @@ Store in file
 
 
 Things to store in image file format:
+Magic cookie
 Ychannel - Function rep
 Cr channel = Function rep
 Cb channel - Function rep
