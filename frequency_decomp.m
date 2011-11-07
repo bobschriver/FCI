@@ -9,6 +9,10 @@ function [ img_LF, img_HF ] = frequency_decomp( img, scale )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%  Kernel Generation  %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Scale image 0-1 for consistency with code
+img = im2double(img);
+
+
 % find size of image
 [numRows, numCols] = size(img);
 
