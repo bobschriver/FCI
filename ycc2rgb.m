@@ -8,9 +8,9 @@ Cr = double(Cr);
 Cb = double(Cb);
 
 % Convert Y, Cr, Cb image data to RGB color space.
-R = Y + 1.4022.*(Cr - 128);
-G = Y - 0.34414.*(Cb - 128) - 0.71414.*(Cr - 128);
-B = Y + 1.772.* (Cb - 128);
+R = Y + 1.4022.*(Cr - .5);
+G = Y - 0.34414.*(Cb - .5) - 0.71414.*(Cr - .5);
+B = Y + 1.772.* (Cb - .5);
 
 % Combine separate RGB channels into one image.
 img(:,:,1) = R;
