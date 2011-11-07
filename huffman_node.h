@@ -15,6 +15,6 @@ struct huffman_node
 	unsigned long long code;
 
 	int data_size;
-	void * data;
+	int * data;
 };
 
