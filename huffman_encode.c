@@ -231,12 +231,11 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 	mexPrintf("%p %p %p\n" , mx_probabilities , mx_patches , mx_patch_size);
 	mexPrintf("%d %d\n" , mxGetNumberOfElements(mx_probabilities) , mxGetNumberOfElements(mx_patches));
 	
-
+	/*
 	double * probabilities = malloc(mxGetNumberOfElements(mx_probabilities));
 
 	mexPrintf("In mexFunction\n");
 	
-	mwIndex i;
 	for(i = 0; i < mxGetNumberOfElements(mx_probabilities); i ++)
 	{
 		double * pr = (double *) mxGetPr(mx_probabilities);
@@ -256,12 +255,13 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 
 		patches[i] = pr[i];
 	}
-
-		unsigned int patch_size = * (unsigned int *)mxGetData(mx_patch_size);
+	*/
+	unsigned int patch_size = * (unsigned int *)mxGetData(mx_patch_size);
 
 	mexPrintf("%d\n" , patch_size);
-
-	struct huffman_node * queue = gen_priority_queue(probabilities , mxGetNumberOfElements(mx_probabilities) , patches , patch_size , mxGetNumberOfElements(mx_patches));
+	
+	
+	struct huffman_node * queue = gen_priority_queue((double *)mxGetPr(mx_probabilities) , mxGetNumberOfElements(mx_probabilities) , (unsigned int *)mxGetData(mx_patches) , patch_size , mxGetNumberOfElements(mx_patches));
 
 	//free(probabilities);
 	//free(patches);	
@@ -271,7 +271,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 
 	mexPrintf("Gen Codes\n");
 	struct huffman_node * codes = gen_huffman_codes(tree);
-	
+	/*
 	unsigned int * data = malloc(mxGetNumberOfElements(mx_data));
 	mexPrintf("Getting Data\n");
 	for(i = 0; i < mxGetNumberOfElements(mx_data); i ++)
@@ -280,10 +280,10 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 		
 		data[i] = pr[i];
 	}
-
+	*/
 	mexPrintf("Encode data\n");
 	int encoded_data_length = 0;
-	unsigned long long * encoded_data = encode_data(codes , data , patch_size , mxGetNumberOfElements(mx_data) , &encoded_data_length);
+	unsigned long long * encoded_data = encode_data(codes , (unsigned int *)mxGetData(mx_data) , patch_size , mxGetNumberOfElements(mx_data) , &encoded_data_length);
 	
 	//free(data);
 
@@ -298,6 +298,7 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 	//mxArray * mx_ret = plhs[0];
 	mexPrintf("%p\n" , mx_ret);
 
+	mwIndex i;
 	for(i = 0; i < encoded_data_length; i ++)
 	{
 		unsigned long long * pr = (unsigned long long *)mxGetData(mx_ret);
