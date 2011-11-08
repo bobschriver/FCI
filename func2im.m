@@ -5,7 +5,7 @@ function [ im ] = func2im( coeff, blockSize )
 %% Initialize
 %Set defaults
 if ~exist('blockSize','var')
-    blockSize = [32 32];
+    blockSize = [64 64];
 end
 
 %Generate x and y coodinates for each block

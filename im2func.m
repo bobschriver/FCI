@@ -9,7 +9,7 @@ if ~exist('order','var')
     order = 'poly33';
 end
 if ~exist('blockSize','var')
-    blockSize = [32 32];
+    blockSize = [64 64];
 end
 
 %% Split the image into regions
@@ -35,9 +35,6 @@ parfor n=1:numel(blocks)
 end
 
 %% Get coeffcients and variable names
-nameFun = @(c) coeffnames(c);
-coeffFun = @(c) coeffvalues(c);
-
-vars = cellfun(nameFun, fitObj, 'UniformOutput',0);
-coeff = cellfun(coeffFun, fitObj, 'UniformOutput',0);
+vars = cellfun(@(c) coeffnames(c), fitObj, 'UniformOutput',0);
+coeff = cellfun(@(c) coeffvalues(c), fitObj, 'UniformOutput',0);
 end
