@@ -5,70 +5,59 @@
 #include <string.h>
 #include <mex.h>
 
+//Generates the priority queue containing all of the data values and their probabilities
 struct huffman_node * gen_priority_queue(double * probabilities , int probability_length , int * patches , int patch_size , int patches_size)
 {
-	mexPrintf("%p %d %p %d %d\n" , probabilities , probability_length , patches , patch_size , patches_size);
-
-	struct huffman_node * first = NULL;
 	
 	int i = 0;
 	for(i = 0; i < probability_length ; i ++)
 	{
+		//Create our struct and clear it
 		struct huffman_node * curr = malloc(sizeof(struct huffman_node));
 		memset(curr , 0 , sizeof(struct huffman_node));
+		
+		//Set the probability and data to point to the right places
 		curr->probability = probabilities[i];
 		curr->data_size = patch_size;
 		curr->data = patches + i * patch_size;
 
-		mexPrintf("%f %d %p\n" , curr->probability , curr->data_size , curr->data);
-
+		//Insert it into our queue
+		//Will automatically deal with ordering
 		insert(curr);
-		
-		if(first == NULL)
-		{	
-			first = curr;
-		}
 	}
 
-	first = get_head();
-
-	mexPrintf("%p\n" , first);
-
-	return first;
+	//get_head returns the head of our queue
+	return get_head();
 }
 
 struct huffman_node * gen_huffman_tree(struct huffman_node * queue)
 {
-	while(1)
+
+	struct huffman_node * left = pop(queue);
+	struct huffman_node * right = pop(queue);
+
+
+	//While we have more than one item in the queue
+	while(right != NULL)
 	{
-		//printf("%d\n" , queue);
-		//fflush(stdout);
-		
 		struct huffman_node * comb = malloc(sizeof(struct huffman_node));
 		memset(comb , 0 , sizeof(struct huffman_node));
-		struct huffman_node * left = pop(queue);
-		struct huffman_node * right = pop(queue);
 
-		//printf("%d\n" , left);
-		//printf("%d\n" , right);
-
+		//Combine the two together
 		comb->left = left;
-		comb->right = right;
-		
-
-		if(right == NULL)
-		{
-			return left;
-		}
-
-		printf("Left probability %f Right probability %f\n\n" , left->probability , right->probability);
+		comb->right = right;	
 
 		comb->probability = left->probability + right->probability;
 
-		insert(comb);	
+		//Reinsert the combination
+		insert(comb);
+
+		left = pop(queue);
+		right = pop(queue);
 	}
 
-	return queue;
+	//Return the last value
+	return left;
 }
 
 struct huffman_node * gen_huffman_codes(struct huffman_node * tree)
@@ -132,7 +121,7 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 {
 	int i = 0;
 
-	int curr_shift = sizeof(unsigned long long) * 8;
+	int curr_shift = sizeof(unsigned long long) * 8 - 1;
 
 
 	unsigned long long * stored_data = malloc(sizeof(unsigned long long));
@@ -146,8 +135,6 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 
 		int * curr_data = &patches[i];
 
-		//printf("%d\n" , curr_data[i]);
-
 		struct huffman_node * curr = codes;
 		struct huffman_node * match = NULL;
 		
@@ -159,14 +146,11 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 
 			for(j = 0; j < patch_size; j ++)
 			{
-				//printf("%d\n" , j);
 				if(curr->data[j] != curr_data[j])
 				{
 					is_match = 0;
 					break;
-				}
-
-								
+				}				
 			}
 
 			if(is_match)
@@ -178,6 +162,7 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 			curr = curr->next;
 		}
 
+		//If we haven't found a match, something bad happened
 		if(match == NULL)
 		{
 			continue;
@@ -187,7 +172,6 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 		unsigned long long code = match->code;
 		int code_size = match->code_size;
 
-		//printf("%d %d %d\n" , match->data[0] , code_size , code);
 	
 		curr_shift -= code_size;
 
@@ -204,19 +188,17 @@ unsigned long long * encode_data(struct huffman_node * codes , int * patches , i
 
 			//The number of bits we need to store is the code size + the current shift , since the curr shift now
 			//Store the number of overflow bits, and is negative
-			curr_shift = sizeof(unsigned long long) * 8 - (code_size - curr_shift * -1);
+			curr_shift = (sizeof(unsigned long long) * 8 - 1) - (code_size - curr_shift * -1);
 		}
-	
-		printf("%d\n" , code);
-		printf("%d\n" , curr_shift);
+
 		stored_data[stored_data_size] += code << curr_shift;
-		printf("%llu\n" , stored_data[stored_data_size]);
+
+		printf("Code shift %d Insert Code %llu Current code %llu\n" , curr_shift , code ,  stored_data[stored_data_size]);
 	}	
 
-	printf("Stored data ret %p %d\n" , stored_data_size_ret , *stored_data_size_ret);
+	//Kinda janky, should fix
 	*stored_data_size_ret = stored_data_size + 1;
 
-	printf("Stored data ret %d %d\n" , *stored_data_size_ret , stored_data_size + 1);
 	return stored_data;
 }
 
@@ -231,80 +213,44 @@ void mexFunction(int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ])
 	mexPrintf("%p %p %p\n" , mx_probabilities , mx_patches , mx_patch_size);
 	mexPrintf("%d %d\n" , mxGetNumberOfElements(mx_probabilities) , mxGetNumberOfElements(mx_patches));
 	
-	/*
-	double * probabilities = malloc(mxGetNumberOfElements(mx_probabilities));
+	double * probabilites = (double *)mxGetPr(mx_probabilities);
+	int probability_size = mxGetNumberOfElements(mx_probabilities);
 
-	mexPrintf("In mexFunction\n");
-	
-	for(i = 0; i < mxGetNumberOfElements(mx_probabilities); i ++)
-	{
-		double * pr = (double *) mxGetPr(mx_probabilities);
-		printf("%f\n" , pr[i]);
-		probabilities[i] = pr[i];
-	}
+	unsigned int * patches = (unsigned int *)mxGetData(mx_patches);
+	int patches_size = mxGetNumberOfElements(mx_patches);	
 
-	unsigned int * patches = malloc(mxGetNumberOfElements(mx_patches));
-
-
-	mexPrintf("Finding Patches\n");
-	for(i = 0; i < mxGetNumberOfElements(mx_patches); i ++)
-	{
-		unsigned int * pr = (unsigned int *)mxGetData(mx_patches);
-		//mexPrintf("%p\n" , pr);
-		mexPrintf("%d\n" , pr[i]);
-
-		patches[i] = pr[i];
-	}
-	*/
 	unsigned int patch_size = * (unsigned int *)mxGetData(mx_patch_size);
 
-	mexPrintf("%d\n" , patch_size);
-	
-	
-	struct huffman_node * queue = gen_priority_queue((double *)mxGetPr(mx_probabilities) , mxGetNumberOfElements(mx_probabilities) , (unsigned int *)mxGetData(mx_patches) , patch_size , mxGetNumberOfElements(mx_patches));
 
-	//free(probabilities);
-	//free(patches);	
+	struct huffman_node * queue = gen_priority_queue(probabilites , probability_size , patches , patch_size , patches_size);
 
-	mexPrintf("Gen Tree\n");
 	struct huffman_node * tree = gen_huffman_tree(queue);
 
-	mexPrintf("Gen Codes\n");
 	struct huffman_node * codes = gen_huffman_codes(tree);
-	/*
-	unsigned int * data = malloc(mxGetNumberOfElements(mx_data));
-	mexPrintf("Getting Data\n");
-	for(i = 0; i < mxGetNumberOfElements(mx_data); i ++)
-	{
-		unsigned int * pr = (unsigned int *)mxGetData(mx_data);
-		
-		data[i] = pr[i];
-	}
-	*/
-	mexPrintf("Encode data\n");
-	int encoded_data_length = 0;
-	unsigned long long * encoded_data = encode_data(codes , (unsigned int *)mxGetData(mx_data) , patch_size , mxGetNumberOfElements(mx_data) , &encoded_data_length);
 	
-	//free(data);
+	unsigned int * data = (unsigned int *)mxGetData(mx_data);
+	int data_size = mxGetNumberOfElements(mx_data);	
 
-	mexPrintf("Encoded Data Length %d\n" , encoded_data_length);
+	//Encoded data length will store our returned data size	
+	int encoded_data_length = 0;
+	unsigned long long * encoded_data = encode_data(codes , data , patch_size , data_size , &encoded_data_length);
 	
-	mexPrintf("%d\n" , nlhs);
-	//mexPrintf("%p\n" , plhs[0]);
+
+	
 	int size[] = {1 , encoded_data_length};
 	mxArray * mx_ret = mxCreateNumericArray(2 , size , mxUINT64_CLASS , mxREAL);
-	plhs[0] = mx_ret;
-	//mexPrintf("%p\n" , plhs[0]);
-	//mxArray * mx_ret = plhs[0];
-	mexPrintf("%p\n" , mx_ret);
 
 	mwIndex i;
 	for(i = 0; i < encoded_data_length; i ++)
 	{
 		unsigned long long * pr = (unsigned long long *)mxGetData(mx_ret);
-		mexPrintf("%p\n" , pr);	
 		pr[i] = encoded_data[i];
 	}
+	free(encoded_data);
+	
+	plhs[0] = mx_ret;
+
+		
 }
 
 int main(char * args , int argc)
