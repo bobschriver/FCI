@@ -117,6 +117,67 @@ struct huffman_node * gen_huffman_codes_3(struct huffman_node * tree , unsigned 
 	}
 }
 
+unsigned long long * encode_huffman_tree(struct huffman_node * tree , int patch_size)
+{
+
+	int code_size = sizeof(unsigned long long) * 8;
+	int curr_offset = code_size;
+	unsigned long long data = 0;
+	int data_size = 0;
+
+	unsigned long long * ret_data = encode_huffman_tree_r(tree , patch_size , code_size , &curr_offset , &data , &data_size);
+
+	return ret_data;
+}
+
+//This is probably the worst thing I've ever written
+unsigned long long * encode_huffman_tree_r(struct huffman_node * tree , int patch_size , int code_size , int * curr_offset , unsigned long long * curr_data , int * data_size)
+{
+
+	int node_or_leaf = tree->left == NULL & tree->right == NULL;
+
+	if(curr_offset > 0)
+	{
+		*data_size++;
+		curr_data = realloc(curr_data , code_size * (*data_size + 1));
+					
+	}
+	
+	curr_data[*data_size] += node_or_leaf << *curr_offset;
+	*curr_offset--;	
+
+	//If we are at a leaf
+	if(tree->left == NULL && tree->right == NULL)
+	{		
+
+		int i = 0;
+		for(i = 0; i < patch_size; i ++)
+		{	
+			int this_node_offset = code_size;
+
+			if(*curr_offset < this_node_offset)
+			{
+				curr_data[*data_size] += tree->data[i] >> (this_node_offset - *curr_offset);
+				this_node_offset -= *curr_offset;
+				curr_offset = code_size;
+				*data_size++;
+				curr_data = realloc(curr_data , code_size * (*data_size + 1));
+			}
+
+			curr_data[*data_size] += tree->data[i] << (*curr_offset - this_node_offset);
+			*curr_offset--;
+		}
+	}
+	else
+	{
+		curr_data = encode_huffman_tree_r(tree->left , patch_size , code_size , curr_offset , curr_data , data_size);
+		curr_data = encode_huffman_tree_r(tree->right , patch_size , code_size , curr_offset , curr_data , data_size);
+	}
+	
+
+	return curr_data;
+} 
+
 unsigned long long * encode_data(struct huffman_node * codes , int * patches , int patch_size , int patches_size , int * stored_data_size_ret)
 {
 	int i = 0;
